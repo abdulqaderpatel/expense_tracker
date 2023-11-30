@@ -87,6 +87,9 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.compose.material3:material3:1.2.0-alpha02")
 
+    //datepicker
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
+
 
 
 
