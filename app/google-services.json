@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1017516116027",
+    "project_id": "expense-tracker-jetpack",
+    "storage_bucket": "expense-tracker-jetpack.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017516116027:android:2e5830cf4b3d71997ff41e",
+        "android_client_info": {
+          "package_name": "com.example.expense_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT8LOyQDNJiYXtZ-X5nVZiXXSKdzNBiec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

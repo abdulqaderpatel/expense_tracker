@@ -1,5 +1,6 @@
 package com.example.expense_tracker.Authentication
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +53,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracker.Components.Authentication.AuthButton
 import com.example.expense_tracker.Components.Authentication.AuthTextField
 import com.example.expense_tracker.Navigation.AuthScreen
+import com.example.expense_tracker.Navigation.Graph
 import com.example.expense_tracker.R
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
 
 @Composable
 fun Login(navController: NavController = rememberNavController()) {
@@ -63,10 +73,10 @@ fun Login(navController: NavController = rememberNavController()) {
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var email by remember {
+        var textEmail by remember {
             mutableStateOf("")
         }
-        var password by remember {
+        var textPassword by remember {
             mutableStateOf("")
         }
         Text(
@@ -90,15 +100,15 @@ fun Login(navController: NavController = rememberNavController()) {
         Spacer(modifier = Modifier.height(20.dp))
 
         AuthTextField(
-            value = email,
-            valueChange = { email = it },
+            value = textEmail,
+            valueChange = { textEmail = it },
             hint = "Enter Email",
             icon = Icons.Default.Email
         )
         Spacer(modifier = Modifier.height(15.dp))
         AuthTextField(
-            value = password,
-            valueChange = { password = it },
+            value = textPassword,
+            valueChange = { textPassword = it },
             hint = "Enter Password",
             icon = Icons.Default.Password,
             keyboardOptions = KeyboardOptions(
@@ -109,7 +119,24 @@ fun Login(navController: NavController = rememberNavController()) {
         Spacer(modifier = Modifier.height(20.dp))
         AuthButton(modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp), onClick = { })
+            .height(48.dp), onClick = {
+
+            try {
+                CoroutineScope(Dispatchers.Main).launch {
+
+                    FirebaseAuth.getInstance()
+                        .signInWithEmailAndPassword(textEmail, textPassword).await()
+
+
+                    navController.navigate(Graph.HOME)
+
+
+                }
+            } catch (e: FirebaseException) {
+                Log.d("TAG", e.toString())
+            }
+
+        })
         {
             Text("Login", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
         }
@@ -125,7 +152,9 @@ fun Login(navController: NavController = rememberNavController()) {
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(10.dp),
-            onClick = { }) {
+            onClick = {
+                navController.navigate(Graph.HOME)
+            }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     modifier = Modifier

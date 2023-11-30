@@ -32,7 +32,7 @@ fun AuthTextField(
     TextField(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .height(55.dp),
         value = value,
         onValueChange = valueChange,
         placeholder = { Text(text = hint, color = Color.Gray) },

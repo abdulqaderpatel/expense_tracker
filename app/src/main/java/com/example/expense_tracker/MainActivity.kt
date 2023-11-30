@@ -1,29 +1,35 @@
 package com.example.expense_tracker
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracker.Navigation.Graph
 import com.example.expense_tracker.Navigation.RootNavGraph
-import com.example.expense_tracker.Supabase.Supabase
+
 import com.example.expense_tracker.ui.theme.Expense_trackerTheme
-import io.github.jan.supabase.gotrue.gotrue
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             Expense_trackerTheme {
+
                 var navController = rememberNavController()
-                RootNavGraph(navController = navController, startingPage = Graph.AUTHENTICATION)
+                FirebaseAuth.getInstance().signOut()
+                var isSignedIn = FirebaseAuth.getInstance().currentUser?.email != null
+                RootNavGraph(
+                    navController = navController,
+                    startingPage = if (!isSignedIn) Graph.AUTHENTICATION else (Graph.HOME)
+                )
+
+
             }
         }
     }
