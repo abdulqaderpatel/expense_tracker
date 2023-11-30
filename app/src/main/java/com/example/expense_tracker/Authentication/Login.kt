@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracker.Components.Authentication.AuthButton
@@ -110,7 +111,7 @@ fun Login(navController: NavController = rememberNavController()) {
             .fillMaxWidth()
             .height(48.dp), onClick = { })
         {
-            Text("Login", color = Color.White)
+            Text("Login", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
         }
         Spacer(modifier = Modifier.height(25.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -120,27 +121,41 @@ fun Login(navController: NavController = rememberNavController()) {
         }
         Spacer(modifier = Modifier.height(30.dp))
         ElevatedButton(
-            modifier = Modifier.fillMaxWidth().height(48.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
             shape = RoundedCornerShape(10.dp),
             onClick = { }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(modifier=Modifier.padding(end = 5.dp),
+                Image(
+                    modifier = Modifier
+                        .padding(end = 5.dp)
+                        .size(25.dp),
                     alignment = Alignment.CenterStart,
                     painter = painterResource(id = R.drawable.google_icon),
                     contentDescription = null
                 )
-                Text(text = "Sign in with Google")
+                Text(
+                    text = "Sign in with Google",
+                    color = Color(0xff6CA4EB),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                )
             }
         }
-        Spacer(modifier = Modifier.height(25.dp))
-        Text(text = buildAnnotatedString {
-            withStyle(style = SpanStyle()) {
-                append("Don't have an account? ")
-            }
-            withStyle(style = SpanStyle(color = Color.Blue)) {
-                append("Create One")
-            }
-        })
+        Spacer(modifier = Modifier.height(45.dp))
+        Row {
+            Text(text = "Don't have an account? ")
+            Text(
+                modifier = Modifier.clickable {
+                    navController.popBackStack()
+                    navController.navigate(AuthScreen.SignUp.route)
+                },
+                text = "Create One",
+                color = Color(0xff3C93DB)
+            )
+        }
+
 
     }
 
