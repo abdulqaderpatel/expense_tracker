@@ -1,6 +1,7 @@
 package com.example.expense_tracker.Main
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
@@ -44,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,8 +66,10 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,41 +89,7 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                     var amount by remember {
                         mutableStateOf("")
                     }
-                    val datePickerState = rememberDatePickerState(selectableDates = object :
-                        SelectableDates {
-                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                            return utcTimeMillis <= System.currentTimeMillis()
-                        }
-                    })
-                    val selectedDate = datePickerState.selectedDateMillis?.let {
-                        convertMillisToDate(it)
-                    }
 
-
-                    val timeState = rememberTimePickerState()
-
-
-                    var selectedHour by remember {
-                        mutableIntStateOf(0) // or use  mutableStateOf(0)
-                    }
-
-                    var selectedMinute by remember {
-                        mutableIntStateOf(0) // or use  mutableStateOf(0)
-                    }
-
-                    var showTimePickerDialog by remember {
-                        mutableStateOf(false)
-                    }
-
-                    var showDatePickerDialog by remember {
-                        mutableStateOf(false)
-                    }
-
-
-                    val timePickerState = rememberTimePickerState(
-                        initialHour = selectedHour,
-                        initialMinute = selectedMinute
-                    )
 
                     var pickedDate by remember {
                         mutableStateOf(LocalDate.now())
@@ -127,21 +98,14 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                     var pickedTime by remember {
                         mutableStateOf(LocalTime.now())
                     }
-
-                    val formattedDate by remember {
-                        derivedStateOf {
-                            DateTimeFormatter.ofPattern("MMM dd yyyy").format(pickedDate)
-                        }
-                    }
-
-                    val formattedTime by remember {
-                        derivedStateOf {
-                            DateTimeFormatter.ofPattern("hh:mm").format(pickedTime)
-                        }
-                    }
+                    val dateTime: LocalDateTime = pickedDate.atTime(pickedTime)
 
                     val dateDialogState = rememberMaterialDialogState()
                     val timeDialogState = rememberMaterialDialogState()
+
+                    var selectedCategory by remember {
+                        mutableStateOf("Grocery")
+                    }
 
 
 
@@ -205,9 +169,10 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                             }
                             negativeButton(text = "Cancel")
                         }) {
-                            datepicker(initialDate = LocalDate.now(),title="Pick a date")
+                            datepicker(initialDate = LocalDate.now(), title = "Pick a date")
                             {
-                                pickedDate=it
+                                pickedDate = it
+                                Log.d("TAGGGG", dateTime.toString())
                             }
                         }
 
@@ -218,9 +183,123 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                             }
                             negativeButton(text = "Cancel")
                         }) {
-                            timepicker(initialTime = LocalTime.now(),title="Pick a Time")
+                            timepicker(initialTime = LocalTime.now(), title = "Pick a Time")
                             {
-                                pickedTime=it
+                                pickedTime = it
+                                pickedTime = pickedTime.truncatedTo(ChronoUnit.MINUTES)
+                                Log.d("TAGGGG", dateTime.toString())
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = "Select Category",
+                            color = Color.DarkGray
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            ElevatedButton(
+                                modifier = Modifier.height(38.dp),
+                                onClick = { selectedCategory = "Grocery" },
+                                shape = RectangleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedCategory == "Grocery") Color(
+                                        0xff24282D
+                                    ) else (Color(0xffE1E7EF))
+                                )
+                            ) {
+                                Text(
+                                    text = "Grocery", style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedCategory == "Grocery") Color.White else (Color.Black)
+                                )
+                            }
+                            ElevatedButton(
+                                modifier = Modifier.height(38.dp),
+                                onClick = { selectedCategory = "Shopping" },
+                                shape = RectangleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedCategory == "Shopping") Color(
+                                        0xff24282D
+                                    ) else (Color(0xffE1E7EF))
+                                )
+                            ) {
+                                Text(
+                                    text = "Shopping", style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedCategory == "Shopping") Color.White else (Color.Black)
+                                )
+                            }
+
+                            ElevatedButton(
+                                modifier = Modifier.height(38.dp),
+                                onClick = { selectedCategory = "Recharge" },
+                                shape = RectangleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedCategory == "Recharge") Color(
+                                        0xff24282D
+                                    ) else (Color(0xffE1E7EF))
+                                )
+                            ) {
+                                Text(
+                                    text = "Recharge", style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedCategory == "Recharge") Color.White else (Color.Black)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            ElevatedButton(
+                                modifier = Modifier.height(38.dp),
+                                onClick = { selectedCategory = "Food" },
+                                shape = RectangleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedCategory == "Food") Color(
+                                        0xff24282D
+                                    ) else (Color(0xffE1E7EF))
+                                )
+                            ) {
+                                Text(
+                                    text = "Food", style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedCategory == "Food") Color.White else (Color.Black)
+                                )
+                            }
+                            ElevatedButton(
+                                modifier = Modifier.height(38.dp),
+                                onClick = { selectedCategory = "Entertainment" },
+                                shape = RectangleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedCategory == "Entertainment") Color(
+                                        0xff24282D
+                                    ) else (Color(0xffE1E7EF))
+                                )
+                            ) {
+                                Text(
+                                    text = "Entertainment",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedCategory == "Entertainment") Color.White else (Color.Black),
+
+                                )
+                            }
+
+                            ElevatedButton(
+                                modifier = Modifier.height(38.dp),
+                                onClick = { selectedCategory = "Travelling" },
+                                shape = RectangleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedCategory == "Travelling") Color(
+                                        0xff24282D
+                                    ) else (Color(0xffE1E7EF))
+                                )
+                            ) {
+                                Text(
+                                    text = "Travelling", style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedCategory == "Travelling") Color.White else (Color.Black)
+                                )
                             }
                         }
                     }
@@ -286,7 +365,3 @@ fun RowScope.AddItem(
     )
 }
 
-private fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("dd/MM/yyyy")
-    return formatter.format(Date(millis))
-}
