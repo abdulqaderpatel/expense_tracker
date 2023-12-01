@@ -57,13 +57,20 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.expense_tracker.Models.Expense
 import com.example.expense_tracker.Navigation.BottomBarScreen
 import com.example.expense_tracker.Navigation.MainNavGraph
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -85,7 +92,14 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
             if (isBottomSheetOpen) {
-                ModalBottomSheet(onDismissRequest = { isBottomSheetOpen = false }) {
+                ModalBottomSheet(
+
+                    onDismissRequest = { isBottomSheetOpen = false }) {
+
+                    var title by remember {
+                        mutableStateOf("")
+                    }
+
                     var amount by remember {
                         mutableStateOf("")
                     }
@@ -113,7 +127,7 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                     Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
                         Text(
                             modifier = Modifier.padding(start = 12.dp),
-                            text = "Cab Charge",
+                            text = "Enter Details",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -130,6 +144,32 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                             value = amount,
                             onValueChange = { amount = it },
                             placeholder = { Text(text = "Enter amount", color = Color.Gray) },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next
+                            ),
+                            colors = TextFieldDefaults.colors(
+
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.DarkGray,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent
+                            ),
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = "Title",
+                            color = Color.DarkGray
+                        )
+                        TextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(55.dp),
+                            value = title,
+                            onValueChange = { title = it },
+                            placeholder = { Text(text = "Enter title", color = Color.Gray) },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Next
@@ -283,7 +323,7 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = if (selectedCategory == "Entertainment") Color.White else (Color.Black),
 
-                                )
+                                    )
                             }
 
                             ElevatedButton(
@@ -301,6 +341,34 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                                     color = if (selectedCategory == "Travelling") Color.White else (Color.Black)
                                 )
                             }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        ElevatedButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                CoroutineScope(Dispatchers.Default).launch {
+                                    var id = System.currentTimeMillis()
+                                    FirebaseFirestore.getInstance().collection("Expense").document()
+                                        .set(
+                                            Expense(
+                                                id = id.toString(),
+                                                userId = FirebaseAuth.getInstance().currentUser!!.uid,
+                                                title=title,
+                                                expense = amount.toInt(),
+                                                date = dateTime.toString(),
+                                                category = selectedCategory
+                                            )
+                                        )
+                                    isBottomSheetOpen=false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xff70DEA5))
+                        ) {
+                            Text(
+                                text = "Add Expense",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.Black
+                            )
                         }
                     }
 
