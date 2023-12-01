@@ -4,7 +4,7 @@ data class Expense(
     val id:String,
     val userId:String,
     val title:String,
-    val expense:Int,
+    val expense: Any,
     val date:String,
     val category:String
 )

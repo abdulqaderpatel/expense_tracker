@@ -2,7 +2,6 @@ package com.example.expense_tracker.Main
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,14 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -28,22 +23,14 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -60,24 +47,19 @@ import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracker.Models.Expense
 import com.example.expense_tracker.Navigation.BottomBarScreen
 import com.example.expense_tracker.Navigation.MainNavGraph
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -110,7 +92,7 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                     }
 
                     var pickedTime by remember {
-                        mutableStateOf(LocalTime.now())
+                        mutableStateOf(LocalTime.now().truncatedTo(ChronoUnit.MINUTES))
                     }
                     val dateTime: LocalDateTime = pickedDate.atTime(pickedTime)
 
@@ -132,18 +114,19 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(10.dp))
+
                         Text(
                             modifier = Modifier.padding(start = 12.dp),
-                            text = "Amount",
+                            text = "Title",
                             color = Color.DarkGray
                         )
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(55.dp),
-                            value = amount,
-                            onValueChange = { amount = it },
-                            placeholder = { Text(text = "Enter amount", color = Color.Gray) },
+                            value = title,
+                            onValueChange = { title = it },
+                            placeholder = { Text(text = "Enter title", color = Color.Gray) },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Next
@@ -160,16 +143,16 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
                             modifier = Modifier.padding(start = 12.dp),
-                            text = "Title",
+                            text = "Amount",
                             color = Color.DarkGray
                         )
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(55.dp),
-                            value = title,
-                            onValueChange = { title = it },
-                            placeholder = { Text(text = "Enter title", color = Color.Gray) },
+                            value = amount,
+                            onValueChange = { amount = it },
+                            placeholder = { Text(text = "Enter amount", color = Color.Gray) },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Next
@@ -348,18 +331,19 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
                             onClick = {
                                 CoroutineScope(Dispatchers.Default).launch {
                                     var id = System.currentTimeMillis()
-                                    FirebaseFirestore.getInstance().collection("Expense").document()
+                                    FirebaseFirestore.getInstance().collection("Expense")
+                                        .document(id.toString())
                                         .set(
                                             Expense(
                                                 id = id.toString(),
                                                 userId = FirebaseAuth.getInstance().currentUser!!.uid,
-                                                title=title,
+                                                title = title,
                                                 expense = amount.toInt(),
                                                 date = dateTime.toString(),
                                                 category = selectedCategory
                                             )
                                         )
-                                    isBottomSheetOpen=false
+                                    isBottomSheetOpen = false
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xff70DEA5))
