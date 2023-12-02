@@ -3,6 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+
     }
 }
 dependencyResolutionManagement {
@@ -15,4 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "expense_tracker"
 include(":app")
+
  

@@ -376,7 +376,8 @@ fun BottomBar(navController: NavHostController) {
 
     val bottomBarDestination = screens.any { it.route == currentDestination?.route }
     if (bottomBarDestination) {
-        NavigationBar {
+        NavigationBar( containerColor = Color(0xffC1E8FF),
+            contentColor = Color(0xffC1E8FF),) {
             screens.forEach { screen ->
                 AddItem(
                     screen = screen,
@@ -394,7 +395,11 @@ fun RowScope.AddItem(
     currentDestination: NavDestination?,
     navController: NavHostController
 ) {
-    NavigationBarItem(
+    NavigationBarItem(colors = androidx.compose.material3.NavigationBarItemDefaults
+        .colors(
+            selectedTextColor = Color.Black,
+            indicatorColor = Color(0xffC1E8FF),
+        ),
         label = {
             Text(text = screen.title)
         },

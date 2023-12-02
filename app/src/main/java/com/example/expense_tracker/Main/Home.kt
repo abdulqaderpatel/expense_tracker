@@ -53,7 +53,7 @@ import java.util.Locale
 @Composable
 fun Home() {
 
-    val expenses = mutableStateListOf<Expense>()
+    val expenses=mutableStateListOf<Expense>()
 
     var totalAmount by remember {
         mutableLongStateOf(0)
@@ -78,11 +78,13 @@ fun Home() {
             Column {
                 Text(
                     text = "Good Morning, ${FirebaseAuth.getInstance().currentUser!!.displayName}",
-                    style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Track your expenses, start your day right",
-                    style = MaterialTheme.typography.titleSmall, color = Color.Gray
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.Gray
                 )
             }
         })
@@ -95,18 +97,21 @@ fun Home() {
         val lastWeekStart = LocalDate.now().minusWeeks(1).atStartOfDay().toString()
 
         //for this month
-        val lastMonthStart =
-            LocalDate.now().minusMonths(1).atStartOfDay().toString()
+        val lastMonthStart = LocalDate.now().minusMonths(1).atStartOfDay().toString()
 
 
 
         if (selectedTime == "Today") {
+            expenses.clear()
+            totalAmount = 0
             FirebaseFirestore.getInstance().collection("Expense")
-                .whereGreaterThanOrEqualTo("date", todayStart)
-                .whereLessThan("date", todayEnd)
+                .whereEqualTo(
+                    "userId", FirebaseAuth.getInstance().currentUser!!.uid
+                )
+
+                .whereGreaterThanOrEqualTo("date", todayStart).whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
-                    expenses.clear()
-                    totalAmount = 0
+
                     if (e != null) {
 
                         return@addSnapshotListener
@@ -127,17 +132,19 @@ fun Home() {
                                 )
                         )
                         totalAmount += doc.getLong("expense") ?: 0
+                        Log.d("hjhgjhg", doc.toString())
                     }
                 }
         }
 
         if (selectedTime == "Last 7 Days") {
+            expenses.clear()
+            totalAmount = 0
             FirebaseFirestore.getInstance().collection("Expense")
-                .whereGreaterThanOrEqualTo("date", lastWeekStart)
-                .whereLessThan("date", todayEnd)
+                .whereEqualTo("userId", FirebaseAuth.getInstance().currentUser!!.uid)
+                .whereGreaterThanOrEqualTo("date", lastWeekStart).whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
-                    expenses.clear()
-                    totalAmount = 0
+
                     if (e != null) {
 
                         return@addSnapshotListener
@@ -163,12 +170,13 @@ fun Home() {
         }
 
         if (selectedTime == "This Month") {
+            expenses.clear()
+            totalAmount = 0
             FirebaseFirestore.getInstance().collection("Expense")
-                .whereGreaterThanOrEqualTo("date", lastMonthStart)
-                .whereLessThan("date", todayEnd)
+                .whereEqualTo("userId", FirebaseAuth.getInstance().currentUser!!.uid)
+                .whereGreaterThanOrEqualTo("date", lastMonthStart).whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
-                    expenses.clear()
-                    totalAmount = 0
+
                     if (e != null) {
 
                         return@addSnapshotListener
@@ -201,10 +209,8 @@ fun Home() {
         ) {
 
 
-            LazyRow()
-            {
-                itemsIndexed(selectedTimeList)
-                { index, time ->
+            LazyRow() {
+                itemsIndexed(selectedTimeList) { index, time ->
                     ElevatedButton(
                         modifier = Modifier
                             .height(38.dp)
@@ -220,7 +226,8 @@ fun Home() {
 
 
                         Text(
-                            text = time, style = MaterialTheme.typography.bodyLarge,
+                            text = time,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = if (selectedTime == selectedTimeList[index]) Color.White else (Color.Black)
                         )
 
@@ -275,8 +282,7 @@ fun Home() {
                     .fillMaxWidth()
                     .padding(10.dp)
 
-            )
-            {
+            ) {
                 itemsIndexed(expenses) { index, expense ->
                     Column(modifier = Modifier.padding(bottom = 15.dp)) {
 
