@@ -2,7 +2,10 @@ package com.example.expense_tracker.Main
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +29,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.graphics.Color
@@ -39,6 +43,7 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +57,9 @@ fun Home() {
         mutableStateOf("Today")
     }
 
+    var today = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM", Locale.ENGLISH))
+
+    var dailyDate=LocalDate.now()
 
 
 
@@ -81,8 +89,8 @@ fun Home() {
 
         //for this month
         val lastMonthStart =
-            LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay().toString()
-        val thisMonthStart = LocalDate.now().withDayOfMonth(1).atStartOfDay().toString()
+            LocalDate.now().minusMonths(1).atStartOfDay().toString()
+
 
 
         if (selectedTime == "Today") {
@@ -146,7 +154,7 @@ fun Home() {
         if (selectedTime == "This Month") {
             FirebaseFirestore.getInstance().collection("Expense")
                 .whereGreaterThanOrEqualTo("date", lastMonthStart)
-                .whereLessThan("date", thisMonthStart)
+                .whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
                     expenses.clear()
                     if (e != null) {
@@ -197,39 +205,107 @@ fun Home() {
                     ) {
 
 
-
-                            Text(
-                                text = time, style = MaterialTheme.typography.bodyLarge,
-                                color = if (selectedTime == selectedTimeList[index]) Color.White else (Color.Black)
-                            )
+                        Text(
+                            text = time, style = MaterialTheme.typography.bodyLarge,
+                            color = if (selectedTime == selectedTimeList[index]) Color.White else (Color.Black)
+                        )
 
 
                     }
                 }
             }
 
+            if (selectedTime == "Today") {
+                Text(
+                    text = "Today, $today",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .padding(10.dp)
 
             )
             {
                 itemsIndexed(expenses) { index, expense ->
-                    Column {
+                    Column(modifier = Modifier.padding(bottom = 10.dp)) {
 
-
+                        //for converting iso string to time
                         val formatter = DateTimeFormatter.ISO_DATE_TIME
                         val dateTime = LocalDateTime.parse(expense.date, formatter)
 
                         val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
                         val formattedTime = dateTime.format(timeFormatter)
 
-                        Text(text = expense.title.toString())
-                        Text(text =formattedTime )
+                        //for converting iso string to date
+                        val formattedDateTime =
+                            LocalDateTime.parse(expense.date, DateTimeFormatter.ISO_DATE_TIME)
+                        var date = formattedDateTime.toLocalDate()
+
+                        val formattedDate = formatDateWithSuffix(date)
+
+                        var isNewDate=date!=dailyDate
+                        if(isNewDate)
+                        {
+                            dailyDate=date
+                        }
+                        Log.d("GSFDF", date.toString())
+                        Log.d("GSFDF", dailyDate.toString())
+                        Log.d("TAGGGG", isNewDate.toString())
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+
+                                if(isNewDate) {
+                                    Text(text = formattedDate)
+                                }
+                                Text(
+                                    text = expense.title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = formattedTime,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            Text(
+                                text = "$ ${expense.expense}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
         }
 
+    }
+}
+
+fun formatDateWithSuffix(date: LocalDate): String {
+    val dayOfMonth = date.dayOfMonth
+    val suffix = getOrdinalSuffix(dayOfMonth)
+    val month = date.month.toString().toLowerCase().capitalize()
+    val year = date.year
+
+    return "$dayOfMonth$suffix $month $year"
+}
+
+fun getOrdinalSuffix(n: Int): String {
+    return when {
+        n in 11..13 -> "th"
+        n % 10 == 1 -> "st"
+        n % 10 == 2 -> "nd"
+        n % 10 == 3 -> "rd"
+        else -> "th"
     }
 }

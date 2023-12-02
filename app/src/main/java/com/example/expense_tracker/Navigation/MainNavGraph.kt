@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -13,7 +14,7 @@ import com.example.expense_tracker.Main.Home
 import com.example.expense_tracker.Main.Insights
 
 @Composable
-fun MainNavGraph(navController: NavHostController)
+fun MainNavGraph(modifier: Modifier=Modifier,navController: NavHostController)
 {
     NavHost(navController = navController, route = Graph.HOME, startDestination =BottomBarScreen.Home.route )
     {

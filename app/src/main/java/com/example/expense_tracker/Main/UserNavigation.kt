@@ -360,7 +360,7 @@ fun UserNavigation(navController: NavHostController = rememberNavController()) {
             }
         }
     ) {
-        MainNavGraph(navController = navController)
+        MainNavGraph(modifier=Modifier.padding(it),navController = navController)
     }
 }
 
