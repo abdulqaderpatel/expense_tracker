@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
@@ -25,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +55,10 @@ fun Home() {
 
     val expenses = mutableStateListOf<Expense>()
 
+    var totalAmount by remember {
+        mutableLongStateOf(0)
+    }
+
     var selectedTimeList = listOf<String>("Today", "Last 7 Days", "This Month")
     var selectedTime by remember {
         mutableStateOf("Today")
@@ -59,7 +66,7 @@ fun Home() {
 
     var today = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM", Locale.ENGLISH))
 
-    var dailyDate=LocalDate.now()
+    var dailyDate = LocalDate.now()
 
 
 
@@ -71,7 +78,7 @@ fun Home() {
             Column {
                 Text(
                     text = "Good Morning, ${FirebaseAuth.getInstance().currentUser!!.displayName}",
-                    style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Track your expenses, start your day right",
@@ -99,6 +106,7 @@ fun Home() {
                 .whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
                     expenses.clear()
+                    totalAmount = 0
                     if (e != null) {
 
                         return@addSnapshotListener
@@ -118,6 +126,7 @@ fun Home() {
 
                                 )
                         )
+                        totalAmount += doc.getLong("expense") ?: 0
                     }
                 }
         }
@@ -128,6 +137,7 @@ fun Home() {
                 .whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
                     expenses.clear()
+                    totalAmount = 0
                     if (e != null) {
 
                         return@addSnapshotListener
@@ -147,6 +157,7 @@ fun Home() {
 
                                 )
                         )
+                        totalAmount += doc.getLong("expense") ?: 0
                     }
                 }
         }
@@ -157,6 +168,7 @@ fun Home() {
                 .whereLessThan("date", todayEnd)
                 .addSnapshotListener { value, e ->
                     expenses.clear()
+                    totalAmount = 0
                     if (e != null) {
 
                         return@addSnapshotListener
@@ -175,7 +187,9 @@ fun Home() {
 
 
                                 )
+
                         )
+                        totalAmount += doc.getLong("expense") ?: 0
                     }
                 }
         }
@@ -214,14 +228,46 @@ fun Home() {
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Card(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(100.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xff1C1C25))
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+
+                    Text(
+                        modifier = Modifier.padding(0.dp),
+                        text = "Amount Spent",
+                        color = Color(0xff878D98),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+
+                    Text(
+                        totalAmount.toString(),
+                        color = Color.White,
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
 
             if (selectedTime == "Today") {
                 Text(
+                    modifier = Modifier.padding(start = 3.dp),
                     text = "Today, $today",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+
             }
 
             LazyColumn(
@@ -232,7 +278,7 @@ fun Home() {
             )
             {
                 itemsIndexed(expenses) { index, expense ->
-                    Column(modifier = Modifier.padding(bottom = 10.dp)) {
+                    Column(modifier = Modifier.padding(bottom = 15.dp)) {
 
                         //for converting iso string to time
                         val formatter = DateTimeFormatter.ISO_DATE_TIME
@@ -248,25 +294,31 @@ fun Home() {
 
                         val formattedDate = formatDateWithSuffix(date)
 
-                        var isNewDate=date!=dailyDate
-                        if(isNewDate)
-                        {
-                            dailyDate=date
+                        var isNewDate = date != dailyDate
+                        if (isNewDate) {
+                            dailyDate = date
                         }
-                        Log.d("GSFDF", date.toString())
-                        Log.d("GSFDF", dailyDate.toString())
-                        Log.d("TAGGGG", isNewDate.toString())
+                        if (selectedTime != "Today") {
+                            if (isNewDate) {
+                                Text(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterHorizontally)
+                                        .padding(bottom = 3.dp),
+                                    text = formattedDate,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Column {
+                            Column() {
 
-                                if(isNewDate) {
-                                    Text(text = formattedDate)
-                                }
+
                                 Text(
                                     text = expense.title,
                                     style = MaterialTheme.typography.bodyLarge,
