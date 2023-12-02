@@ -21,8 +21,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             Expense_trackerTheme {
 
-                var navController = rememberNavController()
+
                 var isSignedIn = FirebaseAuth.getInstance().currentUser?.email != null
+                var navController = rememberNavController()
                 RootNavGraph(
                     navController = navController,
                     startingPage = if (!isSignedIn) Graph.AUTHENTICATION else (Graph.HOME)

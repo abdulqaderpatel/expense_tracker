@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +66,10 @@ import kotlinx.coroutines.tasks.await
 
 
 @Composable
-fun Login(navController: NavController = rememberNavController()) {
+fun Login(navController: NavController) {
+
+
+
 
     Column(
         modifier = Modifier
@@ -127,7 +131,7 @@ fun Login(navController: NavController = rememberNavController()) {
                     FirebaseAuth.getInstance()
                         .signInWithEmailAndPassword(textEmail, textPassword).await()
 
-
+                    navController.popBackStack()
                     navController.navigate(Graph.HOME)
 
 
@@ -191,9 +195,3 @@ fun Login(navController: NavController = rememberNavController()) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-
-fun loginpreview() {
-    Login()
-}

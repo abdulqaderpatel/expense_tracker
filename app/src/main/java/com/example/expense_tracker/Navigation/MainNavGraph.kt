@@ -10,8 +10,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.expense_tracker.Authentication.Login
+import com.example.expense_tracker.Authentication.Signup
 import com.example.expense_tracker.Main.Home
 import com.example.expense_tracker.Main.Insights
+import com.example.expense_tracker.Main.UserNavigation
 
 @Composable
 fun MainNavGraph(modifier: Modifier=Modifier,navController: NavHostController)
@@ -20,12 +23,16 @@ fun MainNavGraph(modifier: Modifier=Modifier,navController: NavHostController)
     {
         composable(route=BottomBarScreen.Home.route)
         {
-            Home()
+            Home(navController=navController)
         }
         composable(route = BottomBarScreen.Insight.route)
         {
             Insights()
         }
+        composable(route = Graph.AUTHENTICATION) {
+            Login(navController = navController)
+        }
+
     }
 }
 

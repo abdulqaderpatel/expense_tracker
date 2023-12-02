@@ -46,6 +46,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracker.Models.Expense
 import com.example.expense_tracker.Navigation.BottomBarScreen
+import com.example.expense_tracker.Navigation.Graph
 import com.example.expense_tracker.Navigation.MainNavGraph
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

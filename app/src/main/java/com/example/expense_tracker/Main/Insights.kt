@@ -8,12 +8,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,7 +38,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,70 +75,220 @@ fun Insights() {
 
 
 
+    if (selectedTime == "Today") {
+        FirebaseFirestore.getInstance().collection("Expense")
+            .whereEqualTo(
+                "userId", FirebaseAuth.getInstance().currentUser!!.uid
+            )
+            .whereGreaterThanOrEqualTo("date", todayStart).whereLessThan("date", todayEnd)
+            .addSnapshotListener { value, e ->
 
-    FirebaseFirestore.getInstance().collection("Expense")
-        .whereEqualTo(
-            "userId", FirebaseAuth.getInstance().currentUser!!.uid
-        )
-        .whereGreaterThanOrEqualTo("date", todayStart).whereLessThan("date", todayEnd)
-        .addSnapshotListener { value, e ->
-            expenses = mutableStateListOf<Long>(0, 0, 0, 0, 0, 0)
 
-            if (e != null) {
+                if (e != null) {
 
-                return@addSnapshotListener
+                    return@addSnapshotListener
+                }
+
+                for (doc in value!!) {
+                    if ((doc.getString("category") ?: "") == "Grocery") {
+                        expenses[0] += doc.getLong("expense") ?: 0
+                        floatExpenses[0] += expenses[0].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Shopping") {
+                        expenses[1] += doc.getLong("expense") ?: 0
+                        floatExpenses[1] += expenses[1].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Food") {
+                        expenses[2] += doc.getLong("expense") ?: 0
+                        floatExpenses[2] += expenses[2].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Recharge") {
+                        expenses[3] += doc.getLong("expense") ?: 0
+                        floatExpenses[3] += expenses[3].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Entertainment") {
+                        expenses[4] += doc.getLong("expense") ?: 0
+                        floatExpenses[4] += expenses[4].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Travelling") {
+                        expenses[5] += doc.getLong("expense") ?: 0
+                        floatExpenses[5] += expenses[5].toFloat()
+                    }
+                }
+
             }
+    }
 
-            for (doc in value!!) {
-                if ((doc.getString("category") ?: "") == "Grocery") {
-                    expenses[0] += doc.getLong("expense") ?: 0
-                    floatExpenses[0] += expenses[0].toFloat()
+    if (selectedTime == "Last 7 Days") {
+        FirebaseFirestore.getInstance().collection("Expense")
+            .whereEqualTo(
+                "userId", FirebaseAuth.getInstance().currentUser!!.uid
+            )
+            .whereGreaterThanOrEqualTo("date", lastWeekStart).whereLessThan("date", todayEnd)
+            .addSnapshotListener { value, e ->
+
+
+                if (e != null) {
+
+                    return@addSnapshotListener
                 }
-                if (doc.getString("category") ?: "" == "Shopping") {
-                    expenses[1] += doc.getLong("expense") ?: 0
-                    floatExpenses[1] += expenses[1].toFloat()
+
+                for (doc in value!!) {
+                    if ((doc.getString("category") ?: "") == "Grocery") {
+                        expenses[0] += doc.getLong("expense") ?: 0
+                        floatExpenses[0] += expenses[0].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Shopping") {
+                        expenses[1] += doc.getLong("expense") ?: 0
+                        floatExpenses[1] += expenses[1].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Food") {
+                        expenses[2] += doc.getLong("expense") ?: 0
+                        floatExpenses[2] += expenses[2].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Recharge") {
+                        expenses[3] += doc.getLong("expense") ?: 0
+                        floatExpenses[3] += expenses[3].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Entertainment") {
+                        expenses[4] += doc.getLong("expense") ?: 0
+                        floatExpenses[4] += expenses[4].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Travelling") {
+                        expenses[5] += doc.getLong("expense") ?: 0
+                        floatExpenses[5] += expenses[5].toFloat()
+                    }
                 }
-                if (doc.getString("category") ?: "" == "Food") {
-                    expenses[2] += doc.getLong("expense") ?: 0
-                    floatExpenses[2] += expenses[2].toFloat()
-                }
-                if (doc.getString("category") ?: "" == "Recharge") {
-                    expenses[3] += doc.getLong("expense") ?: 0
-                    floatExpenses[3] += expenses[3].toFloat()
-                }
-                if (doc.getString("category") ?: "" == "Entertainment") {
-                    expenses[4] += doc.getLong("expense") ?: 0
-                    floatExpenses[4] += expenses[4].toFloat()
-                }
-                if (doc.getString("category") ?: "" == "Travelling") {
-                    expenses[5] += doc.getLong("expense") ?: 0
-                    floatExpenses[5] += expenses[5].toFloat()
-                }
+
             }
+    }
 
-        }
+    if (selectedTime == "This Month") {
+        FirebaseFirestore.getInstance().collection("Expense")
+            .whereEqualTo(
+                "userId", FirebaseAuth.getInstance().currentUser!!.uid
+            )
+            .whereGreaterThanOrEqualTo("date", lastMonthStart).whereLessThan("date", todayEnd)
+            .addSnapshotListener { value, e ->
+
+
+                if (e != null) {
+
+                    return@addSnapshotListener
+                }
+
+                for (doc in value!!) {
+                    if ((doc.getString("category") ?: "") == "Grocery") {
+                        expenses[0] += doc.getLong("expense") ?: 0
+                        floatExpenses[0] += expenses[0].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Shopping") {
+                        expenses[1] += doc.getLong("expense") ?: 0
+                        floatExpenses[1] += expenses[1].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Food") {
+                        expenses[2] += doc.getLong("expense") ?: 0
+                        floatExpenses[2] += expenses[2].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Recharge") {
+                        expenses[3] += doc.getLong("expense") ?: 0
+                        floatExpenses[3] += expenses[3].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Entertainment") {
+                        expenses[4] += doc.getLong("expense") ?: 0
+                        floatExpenses[4] += expenses[4].toFloat()
+                    }
+                    if (doc.getString("category") ?: "" == "Travelling") {
+                        expenses[5] += doc.getLong("expense") ?: 0
+                        floatExpenses[5] += expenses[5].toFloat()
+                    }
+                }
+
+            }
+    }
 
     Scaffold(topBar = {
         TopAppBar(title = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Expense Report",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Track your expenses, start your day right",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Gray
-                )
-            }
+
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Expense Report",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+
         })
     })
     {
-        Column(modifier = Modifier.padding(it)) {
+        Column(
+            modifier = Modifier.padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            LazyRow() {
+                itemsIndexed(selectedTimeList) { index, time ->
+                    ElevatedButton(
+                        modifier = Modifier
+                            .height(38.dp)
+                            .padding(horizontal = 5.dp),
+                        onClick = { selectedTime = selectedTimeList[index] },
+                        shape = RectangleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedTime == selectedTimeList[index]) Color(
+                                0xff24282D
+                            ) else (Color(0xffE1E7EF))
+                        )
+                    ) {
+
+
+                        Text(
+                            text = time,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (selectedTime == selectedTimeList[index]) Color.White else (Color.Black)
+                        )
+
+
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Card(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(100.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xff1C1C25))
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+
+                    Text(
+                        modifier = Modifier.padding(0.dp),
+                        text = "Amount Spent",
+                        color = Color(0xff878D98),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+
+                    Text(
+                        expenses.sum().toString(),
+                        color = Color.White,
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+            }
             PieChart(
                 floatExpenses
             )
+
         }
     }
 }
